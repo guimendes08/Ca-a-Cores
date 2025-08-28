@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Caça-Cores </title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 { color: #333; }
+    #info { margin: 20px 0; font-size: 20px; }
+    #game {
+      display: grid;
+      grid-gap: 10px;
+      justify-content: center;
+      margin: 0 auto;
+    }
+    .square {
+      width: 100px;
+      height: 100px;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: transform 0.15s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+    .square:hover { transform: scale(1.07); }
+    #score { font-size: 22px; font-weight: bold; margin-top: 20px; }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      background: #333;
+      color: white;
+    }
+    button:hover { background: #555; }
+  </style>
+</head>
+<body>
+  <h1>🎨 Caça-Cores </h1>
+  <div id="info">Clique na cor: <span id="target"></span></div>
+  <div id="game"></div>
+  <div id="score">Pontuação: 0</div>
+  <button onclick="startGame()">Iniciar Jogo</button>
+
+  <script>
+    const colors = ["vermelho", "azul", "verde", "amarelo", "roxo", "laranja", "rosa", "marrom", "preto"];
+    const colorMap = {
+      vermelho: "red",
+      azul: "blue",
+      verde: "green",
+      amarelo: "yellow",
+      roxo: "purple",
+      laranja: "orange",
+      rosa: "pink",
+      marrom: "brown",
+      preto: "black"
+    };
+
+    let targetColor = "";
+    let score = 0;
+    let level = 4; // número pretendido de quadrados (vai aumentar quando acertar)
+
+    function shuffle(arr) {
+      // retorna uma cópia embaralhada
+      return arr.slice().sort(() => Math.random() - 0.5);
+    }
+
+    function startGame() {
+      score = 0;
+      level = 4;
+      document.getElementById("score").textContent = "Pontuação: " + score;
+      nextRound();
+    }
+
+    function nextRound() {
+      const game = document.getElementById("game");
+      game.innerHTML = "";
+
+      // evitar repetir cores nesta rodada: usar no máximo colors.length quadrados
+      const numSquares = Math.min(level, colors.length);
+      const displayedColors = shuffle(colors).slice(0, numSquares);
+
+      // garantir que a cor alvo esteja sempre entre as exibidas
+      targetColor = displayedColors[Math.floor(Math.random() * displayedColors.length)];
+      document.getElementById("target").textContent = targetColor;
+
+      // ajustar colunas do grid para caber bem
+      const cols = Math.min(numSquares, 6); // limite visual a 6 colunas
+      game.style.gridTemplateColumns = `repeat(${cols}, 100px)`;
+
+      // criar quadrados (cada cor exibida é única nesta rodada)
+      displayedColors.forEach(c => {
+        const div = document.createElement("div");
+        div.className = "square";
+        div.style.background = colorMap[c];
+        div.dataset.color = c;
+
+        div.onclick = function() {
+          const clicked = this.dataset.color;
+          if (clicked === targetColor) {
+            score++;
+            level++; // aumenta dificuldade (até o máximo de colors.length)
+          } else {
+            score--;
+          }
+          document.getElementById("score").textContent = "Pontuação: " + score;
+          nextRound();
+        };
+
+        game.appendChild(div);
+      });
+    }
+  </script>
+</body>
+</html>
